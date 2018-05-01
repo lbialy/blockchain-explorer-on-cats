@@ -1,13 +1,10 @@
 package machinespir.it.blockchainexploreroncats
 
 import cats.effect.{Effect, IO}
-import fs2.StreamApp
+import fs2.{Stream, StreamApp}
 import fs2.async.Ref
-import fs2.Stream
-import machinespir.it.blockchainexploreroncats.Config.ConfigurationError
 import machinespir.it.blockchainexploreroncats.rpc.RpcClient
 import org.http4s.HttpService
-import org.http4s.client.Client
 import org.http4s.client.blaze.Http1Client
 import org.http4s.server.blaze.BlazeBuilder
 
@@ -17,7 +14,7 @@ object BlockChainExplorerServer extends StreamApp[IO] {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  lazy val configIO: Stream[IO, Config] = Stream.eval(Config.load)
+  def configIO: Stream[IO, Config] = Stream.eval(Config.load)
 
   def stream(args: List[String], requestShutdown: IO[Unit]): Stream[IO, StreamApp.ExitCode] = {
     ServerStream.stream[IO](configIO)
@@ -26,7 +23,6 @@ object BlockChainExplorerServer extends StreamApp[IO] {
 }
 
 object ServerStream {
-
 
   private def http1ClientStream[F[_] : Effect] = Http1Client.stream[F]()
 
