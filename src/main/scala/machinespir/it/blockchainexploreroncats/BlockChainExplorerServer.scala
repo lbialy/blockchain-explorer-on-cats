@@ -1,11 +1,14 @@
 package machinespir.it.blockchainexploreroncats
 
+import java.security.Provider
+
 import cats.effect.{Effect, IO}
 import fs2.{Stream, StreamApp}
 import fs2.async.Ref
+import javax.net.ssl.{SSLContext, SSLContextSpi}
 import machinespir.it.blockchainexploreroncats.rpc.RpcClient
 import org.http4s.HttpService
-import org.http4s.client.blaze.Http1Client
+import org.http4s.client.blaze.{BlazeClientConfig, Http1Client}
 import org.http4s.server.blaze.BlazeBuilder
 
 import scala.concurrent.ExecutionContext
@@ -24,7 +27,14 @@ object BlockChainExplorerServer extends StreamApp[IO] {
 
 object ServerStream {
 
-  private def http1ClientStream[F[_] : Effect] = Http1Client.stream[F]()
+  class DummySSLContext(spi: SSLContextSpi, provider: Provider, s: String) extends SSLContext(spi, provider, s) {
+  }
+
+  private def sslContext: SSLContext = new DummySSLContext(null, null, null)
+
+  private def http1ClientStream[F[_] : Effect] = Http1Client.stream[F] {
+    BlazeClientConfig.defaultConfig.copy(sslContext = Some(sslContext))
+  }
 
   private def idGenStream[F[_] : Effect] = Stream.eval(Ref[F, Long](0))
 

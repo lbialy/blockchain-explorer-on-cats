@@ -18,6 +18,14 @@ lazy val root = (project in file("."))
       "org.specs2"            %% "specs2-core"         % Specs2Version % "test",
       "ch.qos.logback"        %  "logback-classic"     % LogbackVersion
     ),
-    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+    javaOptions in Universal ++= Seq(
+      "-J-XX:+UnlockExperimentalVMOptions",
+      "-J-XX:+UseCGroupMemoryLimitForHeap",
+      "-J-XX:MaxRAMFraction=1",
+      "-J-XshowSettings:vm"
+    ),
+    dockerUpdateLatest := true
   )
+  .enablePlugins(JavaAppPackaging, DockerPlugin)
 
